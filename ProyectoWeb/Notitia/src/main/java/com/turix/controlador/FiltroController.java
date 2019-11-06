@@ -6,6 +6,7 @@
 package com.turix.controlador;
 
 import com.sun.faces.context.SessionMap;
+import static com.sun.faces.facelets.util.Path.context;
 import com.turix.modelo.Marcadores;
 import com.turix.modelo.Temas;
 import com.turix.modelo.Usuario;
@@ -15,9 +16,11 @@ import java.util.Locale;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.RequestScoped;
 import javax.faces.bean.SessionScoped;
 import javax.faces.bean.ViewScoped;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import static javax.faces.context.FacesContext.getCurrentInstance;
 import org.primefaces.event.map.OverlaySelectEvent;
@@ -31,10 +34,12 @@ import org.primefaces.model.map.Marker;
  * @author dianis
  */
 @ManagedBean
-@ViewScoped
-public class MarcadorController {
+@SessionScoped 
+public class FiltroController {
+
     
-   private  MapModel model;
+   private final MapModel model = new DefaultMapModel();
+   private final MapModel modelFiltro = new DefaultMapModel();
     private Utility u = new Utility();
     private Marcadores marcador = new Marcadores();
     private Temas tema = new Temas();
@@ -48,18 +53,9 @@ public class MarcadorController {
     private Marker marker;
     private String ubicacion;
     private String filtro;
-     private List <Marcadores> marcadores;
- private SessionMap map ;
- private boolean validar;
- 
- public boolean isValidar() {
-        return validar;
-    }
+    private SessionMap map ;
+    private List <Marcadores> marcadores;
 
-    public void setValidar(boolean validar) {
-        this.validar = validar;
-    }
- 
     public List<Marcadores> getLista() {
         return marcadores;
     }
@@ -67,6 +63,7 @@ public class MarcadorController {
     public void setLista(List<Marcadores> lista) {
         this.marcadores = lista;
     }
+
    
 
     public String getUbicacion() {
@@ -95,9 +92,12 @@ public class MarcadorController {
 
     @PostConstruct
     public void init() {
-        model = new DefaultMapModel();
-        marcadores = iniciar();
-        System.out.println("---------------ELEMENTOS: "+marcadores.size());
+     
+            marcadores=u.filtrar(filtro);
+             System.out.println("-------------------------------");
+              System.out.println(filtro);
+        System.out.println("Elementos filtro:" + marcadores.size());
+        System.out.println("-------------------------------");
         marcadores.forEach((marcador) -> {
            String[] coordenadas= marcador.getUbicacion().split(",");
            double c1=Double.parseDouble(coordenadas[0]);
@@ -107,29 +107,14 @@ public class MarcadorController {
                     marcador.getDescripcion()));
                 
         });
-       
+        
         
         
     }
-    /**
-     * Metodo que regresa una lista para inicializar el mapa
-     * @return 
-     */
-    public List<Marcadores> iniciar(){
-     marcadores= null;
-       if(filtro==null){
-           marcadores= u.darMarcadores();
-       }else
-           marcadores=u.filtrar(filtro);
-        return marcadores;
-    
-       }
-    
-    public void valida(){
-         if(!marcador.getDatos_utiles().equals(null)||! marcador.getDescripcion().equals(null))
-             validar=true;
-    }
-        
+        public void savefiltro(){
+             String f = (String) map.get("filtro");
+           setFiltro(f);
+        }
     
       public String getDatos_utiles() {
         return datos_utiles;
@@ -160,7 +145,9 @@ public class MarcadorController {
         return model;
     }
 
-  
+    public MapModel getModelFiltro() {
+        return modelFiltro;
+    }
     
     
     public String getData() {
@@ -195,7 +182,7 @@ public class MarcadorController {
         this.tema=tema;
     }
 
-    public MarcadorController() {
+    public FiltroController() {
         FacesContext.getCurrentInstance()
                 .getViewRoot()
                 .setLocale(new Locale("es-Mx"));
@@ -233,7 +220,7 @@ public class MarcadorController {
          u.guardarMarcador(marcador);
          model.addOverlay(new Marker(new LatLng(lat, lng),marcador.getDatos_utiles()));
            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Marker Added", "Lat:" + lat + ", Lng:" + lng));
-        
+        marcador = null;
          }
     /**
      * Metodo para checar si existe el Tema
@@ -246,7 +233,6 @@ public class MarcadorController {
        return u.existeTema(t);
     }
 
-    
 
     /**
      * Metodo para checar si existe el Usuario
@@ -272,10 +258,10 @@ public class MarcadorController {
       * manda a llamar a eliminarMarcador de Utility
       * para eliminarlo de la BD
       */
-     public String eliminaMarcador(){
+     public void eliminaMarcador(){
+         System.out.println(ubicacion);
          marcador.setUbicacion(ubicacion);
              u.eliminarMarcador(marcador);
-             return "map";
 
      }
      public List misMarcadores() throws SQLException{
@@ -295,47 +281,33 @@ public class MarcadorController {
         title = (String) marker.getTitle();
   
     }
-      /**
-       * Metodo que guarda el filtro para marcadores
-       */
-       public void savefiltro(){
-             String f = (String) map.get("filtro");
-           setFiltro(f);
-        }
       
-       
-       /**
-        * Metodo que inicializa el mapa con los marcadores filtrados
-        */
-      public void filtrar(){
-         
-      
+      public String filtrar(){
+          System.out.println("-------------------------------");
+          System.out.println("filtrar en filtroController:"+ filtro);
+          System.out.println("-------------------------------");
           List<Marcadores> marcadores = u.filtrar(filtro);
           FacesContext context = getCurrentInstance();
           map = (SessionMap) context.getExternalContext().getSessionMap();
           map.put("filtro", filtro);
           savefiltro();
-          init();
-        
+        String mapa = "mapaFiltro";
+       return mapa;
           
+      
+          
+        
         
           
       }
-      
-      
+
     public String getFiltro() {
+        
         return filtro;
     }
 
     public void setFiltro(String filtro) {
         this.filtro = filtro;
-    }
-    
-    public boolean verificar(){
-        boolean lleno=false;
-        if(!marcador.getDatos_utiles().equals(null)||! marcador.getDescripcion().equals(null)|| !marcador.getTemas().equals(null))
-            lleno=true;
-       return lleno;
     }
       
       

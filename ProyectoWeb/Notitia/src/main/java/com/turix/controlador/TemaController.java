@@ -27,6 +27,7 @@ public class TemaController {
     private Utility u = new Utility();
     public String nom;
 
+
     public String getNom() {
         return nom;
     }
@@ -57,6 +58,7 @@ public class TemaController {
       */
      public void guardarTema(){
              u.guardarTema(tema);
+             
             tema = null;         
          }
 
@@ -79,4 +81,16 @@ public class TemaController {
      public List listaTemas(){
         return u.darTemas();
      }
+     
+     /**
+      * Metodo que da la lista de todos los temas
+      * manda a llamar darTema de Utility
+      * para buscarlos en la BD
+      * @return List
+      */
+     public List getListaNomTemas(){
+        return u.darNomTemas();
+     }
+     
+     
 }

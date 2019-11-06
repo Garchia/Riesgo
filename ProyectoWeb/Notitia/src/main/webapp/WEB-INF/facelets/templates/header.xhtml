@@ -7,7 +7,7 @@
 
   <!-- Main jumbotron for a primary marketing message or call to action -->
   <nav class="navbar navbar-expand-md navbar-light fixed-top" style="background-color: #e3f2fd;">
-    <a class="navbar-brand" href="#">Notitia</a>
+    <a class="navbar-brand" href="http://localhost:8080/Notitia/inicio.xhtml">Notitia</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -15,6 +15,11 @@
       <div class="navbar-nav ml-auto">
         <c:choose>
             <c:when test="#{loginController.logged}">
+                <h:form id="return">
+              <p:commandLink action="miPerfilCo">
+                  <h:graphicImage value="/img/ph.png" />
+              </p:commandLink>
+           </h:form>
             <div class="my-2 my-lg-0">>
               <button class="btn btn-primary" style="height:42px;">
                 <i class="fa fa-sign-in" aria-hidden="true"></i>
@@ -22,32 +27,39 @@
               </button>
             </div>
             <div class ="my-2 my-lg-0">
+
               <h:form id="exit">
                   <h:commandButton action="#{loginController.logout()}"
                                value="Cerrar Sesión"
                                class="btn btn-outline-success my-2 my-sm-0"
                                style="height:48px;"/>
               </h:form>
+
             </div>
           </c:when>
           <c:otherwise>
-              
+
             <h:form id="myForm" class="form-inline my-2 my-lg-0">
-               
-                <h:inputText value="#{loginController.login.usuario}"
-                           required="true" id="nombre_usuario"
-                           size="15" class="form-control mr-sm-2"
-                           a:placeholder="Nombre"/>
+               <table>
+                    <tr><td>
+                        <p:messages id="messages" autoUpdate="true" closable="true" />
+                    </td></tr>
+                </table>
+                <table>
+                    <h:inputText value="#{loginController.login.usuario}"
+                               required="true" id="nombre_usuario"
+                               size="15" class="form-control mr-sm-2"
+                               a:placeholder="Nombre"/>
 
-              <h:inputSecret value="#{loginController.login.contraseña}"
-                             required="true" id="contraseña"
-                             class="form-control mr-sm-2"
-                             a:placeholder="Contraseña"/>
+                    <h:inputSecret value="#{loginController.login.contraseña}"
+                                 required="true" id="contraseña"
+                                 class="form-control mr-sm-2"
+                                 a:placeholder="Contraseña"/>
 
-              <h:commandButton action="#{loginController.openUser()}"
-                               value="Inicia Sesión"
-                               class="btn btn-outline-success my-2 my-sm-0"/>
-
+                    <h:commandButton action="#{loginController.openUser()}"
+                                   value="Inicia Sesión"
+                                   class="btn btn-outline-success my-2 my-sm-0"/>
+                </table>
             </h:form>
               <h:form>
               <h:commandButton action="registro?faces-redirect=true"
